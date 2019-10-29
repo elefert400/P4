@@ -17,20 +17,20 @@ void ProgramNode::typeAnalysis(TypeAnalysis * ta){
 	// be needed. We can just set it to VOID
 	ta->nodeType(this, VarType::produce(VOID));
 
-	//Alternatively, we could make our type 
+	//Alternatively, we could make our type
 	// be error if the DeclListNode is an error
 
 	//Lookup the type assigned to the declList
 	// in the earlier recursive call
-	const DataType * childType = 
+	const DataType * childType =
 		ta->nodeType(myDeclList);
 
-	//The asError() function of the DataType 
+	//The asError() function of the DataType
 	// class returns null (false) in every
 	// subclass EXCEPT for the ErrorType subclass,
 	// where it returns itself (non-null/true).
 	if (childType->asError()){
-		//The child type is error, so 
+		//The child type is error, so
 		// set the program node to error
 		// as well
 		ta->nodeType(this, ErrorType::produce());
@@ -38,7 +38,7 @@ void ProgramNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void DeclListNode::typeAnalysis(TypeAnalysis * ta){
-	
+
 	ta->nodeType(this, VarType::produce(VOID));
 
 	for (auto decl : *myDecls){
@@ -63,8 +63,8 @@ void FnDeclNode::typeAnalysis(TypeAnalysis * ta){
 
 	//HINT: you might want to change the signature for
 	// typeAnalysis on FnBodyNode to take a second
-	// argument which is the type of the current 
-	// function. This will help you to know at a 
+	// argument which is the type of the current
+	// function. This will help you to know at a
 	// return statement whether the return type matches
 	// the current function
 
@@ -74,8 +74,8 @@ void FnDeclNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void FnBodyNode::typeAnalysis(TypeAnalysis * ta){
-	//HINT: as above, you may want to pass the 
-	// fnDecl's type into the statement list as a 
+	//HINT: as above, you may want to pass the
+	// fnDecl's type into the statement list as a
 	// second argument to StmtList::typeAnalysis
 
 	//Note, this function may need extra code
@@ -98,7 +98,7 @@ void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
 
 	myAssign->typeAnalysis(ta);
 
-	//It can be a bit of a pain to write 
+	//It can be a bit of a pain to write
 	// "const DataType *" everywhere, so here
 	// the use of auto is used instead to tell the
 	// compiler to figure out what the subType variable
@@ -118,80 +118,134 @@ void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta){
 
 }
 void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void CallStmtNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void CallExpNode::typeAnalysis(TypeAnalysis* ta){
 
 }
 void PlusNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void MinusNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void TimesNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void DivideNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void AndNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are bools,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void OrNode::typeAnalysis(TypeAnalysis* ta){
-	
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are bools,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void EqualsNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void LessNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void GreaterNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void LessEqNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void GreaterEqNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void UnaryMinusNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void NotNode::typeAnalysis(TypeAnalysis* ta){
-	
+
 }
 void ExpNode::typeAnalysis(TypeAnalysis * ta){
 	TODO("Override me in the subclass");
 }
 
 void AssignNode::typeAnalysis(TypeAnalysis * ta){
-	//TODO: Note that this function is incomplete. 
+	//TODO: Note that this function is incomplete.
 	// and needs additional code
 
 	//Do typeAnalysis on the subexpressions
@@ -201,7 +255,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 	const DataType * tgtType = ta->nodeType(myTgt);
 	const DataType * srcType = ta->nodeType(mySrc);
 
-	//While incomplete, this gives you one case for 
+	//While incomplete, this gives you one case for
 	// assignment: if the types are exactly the same
 	// it is usually ok to do the assignment. One
 	// exception is that if both types are function
@@ -216,7 +270,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		//ta->nodeType(this, VarType::VOID());
 		return;
 	}
-	
+
 	//Some functions are already defined for you to
 	// report type errors. Note that these functions
 	// also tell the typeAnalysis object that the
@@ -236,14 +290,14 @@ void DeclNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void VarDeclNode::typeAnalysis(TypeAnalysis * ta){
-	// VarDecls always pass type analysis, since they 
+	// VarDecls always pass type analysis, since they
 	// are never used in an expression. You may choose
 	// to type them void (like this).
 	ta->nodeType(this, VarType::produce(VOID));
 
 	//Alternatively, you could give the VarDecl
 	// the type of the symbol it declares (this works
-	// because it's type was attached during 
+	// because it's type was attached during
 	// nameAnalysis)
 	ta->nodeType(this, myID->getSymbol()->getType());
 }
@@ -269,4 +323,4 @@ void FalseNode::typeAnalysis(TypeAnalysis * ta) {
 	ta->nodeType(this, VarType::produce(BOOL));
 }
 
-}
+}//end namespace Lake
