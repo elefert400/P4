@@ -103,6 +103,8 @@ void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
 	// the use of auto is used instead to tell the
 	// compiler to figure out what the subType variable
 	// should be
+
+	//const DataType*
 	auto subType = ta->nodeType(myAssign);
 
 	if (subType->asError()){
@@ -112,6 +114,78 @@ void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
 	}
 }
 
+void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta){
+
+}
+void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void CallStmtNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void CallExpNode::typeAnalysis(TypeAnalysis* ta){
+
+}
+void PlusNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void MinusNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void TimesNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void DivideNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void AndNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void OrNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void EqualsNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void LessNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void GreaterNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void LessEqNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void GreaterEqNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void UnaryMinusNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
+void NotNode::typeAnalysis(TypeAnalysis* ta){
+	
+}
 void ExpNode::typeAnalysis(TypeAnalysis * ta){
 	TODO("Override me in the subclass");
 }
@@ -132,7 +206,14 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 	// it is usually ok to do the assignment. One
 	// exception is that if both types are function
 	// names, it should fail type analysis
+	if(tgtType->asFn() != nullptr){
+		ta->badAssignOpd(this->getLine(), this->getCol());
+		ta->nodeType(this, ErrorType::produce());
+		return;
+	}
 	if (tgtType == srcType){
+		// if(ta->passed())
+		//ta->nodeType(this, VarType::VOID());
 		return;
 	}
 	
@@ -173,11 +254,19 @@ void IdNode::typeAnalysis(TypeAnalysis * ta){
 	// depends on their definition)
 	ta->nodeType(this, this->getSymbol()->getType());
 }
+void DerefNode::typeAnalysis(TypeAnalysis * ta){
 
+}
 void IntLitNode::typeAnalysis(TypeAnalysis * ta){
 	// IntLits never fail their type analysis and always
 	// yield the type INT
 	ta->nodeType(this, VarType::produce(INT));
+}
+void TrueNode::typeAnalysis(TypeAnalysis * ta) {
+	ta->nodeType(this, VarType::produce(BOOL));
+}
+void FalseNode::typeAnalysis(TypeAnalysis * ta) {
+	ta->nodeType(this, VarType::produce(BOOL));
 }
 
 }

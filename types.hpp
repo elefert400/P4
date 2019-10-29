@@ -75,6 +75,7 @@ private:
 //DataType subclass for all scalar types 
 class VarType : public DataType{
 public:
+	//constructor replacement for non-pointer types
 	static VarType * produce(BaseType base){
 		return produce(base, 0);
 	}
@@ -95,6 +96,7 @@ public:
 	//Note the use of the static function declaration, which 
 	// means that no instance of VarType is needed to call
 	// the function.
+	//constructor replacement for pointer types
 	static VarType * produce(BaseType base, size_t depth){
 		//Note the use of the static local variable, which
 		//means that the flyweights variable persists between
