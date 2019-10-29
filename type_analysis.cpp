@@ -115,10 +115,62 @@ void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * ExpType = ta->nodeType(myExp);
 
+	bool valid = true;
+
+	//checking if myexp is an error
+	if(ExpType->asError()){
+		valid = false;
+	}
+	//checking if exp is of type int or ptr
+	if(!(ExpType->isInt() || ExpType->isPtr()))
+	{
+		ta->badMathOpd(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		ta->nodeType(this, ExpType);
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * ExpType = ta->nodeType(myExp);
 
+	bool valid = true;
+
+	//checking if myexp is an error
+	if(ExpType->asError()){
+		valid = false;
+	}
+	//checking if exp is of type int or ptr
+	if(!(ExpType->isInt() || ExpType->isPtr()))
+	{
+		ta->badMathOpd(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		ta->nodeType(this, ExpType);
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
 
@@ -155,6 +207,55 @@ void PlusNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt() || Exp1Type->isPtr()))
+	{
+		ta->badMathOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt() || Exp2Type->isPtr()))
+	{
+		ta->badMathOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//int + ptr
+		if(Exp1Type->isInt() && Exp2Type->IsPtr()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//ptr + int
+		if(Exp2Type->isInt() && Exp1Type->IsPtr()){
+			ta->nodeType(this, Exp1Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badMathOpr(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void MinusNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -167,6 +268,55 @@ void MinusNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt() || Exp1Type->isPtr()))
+	{
+		ta->badMathOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt() || Exp2Type->isPtr()))
+	{
+		ta->badMathOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//int + ptr
+		if(Exp1Type->isInt() && Exp2Type->IsPtr()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//ptr + int
+		if(Exp2Type->isInt() && Exp1Type->IsPtr()){
+			ta->nodeType(this, Exp1Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badMathOpr(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void TimesNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -179,6 +329,55 @@ void TimesNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt() || Exp1Type->isPtr()))
+	{
+		ta->badMathOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt() || Exp2Type->isPtr()))
+	{
+		ta->badMathOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//int + ptr
+		if(Exp1Type->isInt() && Exp2Type->IsPtr()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//ptr + int
+		if(Exp2Type->isInt() && Exp1Type->IsPtr()){
+			ta->nodeType(this, Exp1Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badMathOpr(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void DivideNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -191,6 +390,55 @@ void DivideNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt() || Exp1Type->isPtr()))
+	{
+		ta->badMathOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt() || Exp2Type->isPtr()))
+	{
+		ta->badMathOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//int + ptr
+		if(Exp1Type->isInt() && Exp2Type->IsPtr()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//ptr + int
+		if(Exp2Type->isInt() && Exp1Type->IsPtr()){
+			ta->nodeType(this, Exp1Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badMathOpr(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void AndNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -198,11 +446,52 @@ void AndNode::typeAnalysis(TypeAnalysis* ta){
 	const DataType * Exp1Type = ta->nodeType(myExp1);
 	const DataType * Exp2Type = ta->nodeType(myExp2);
 	/*
-	check if they are functions, check if they are bools,
+	check if they are functions, check if they are ints,
 	check if the ptr depth is the same,
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isBool())
+	{
+		ta->badLogicOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isBool())
+	{
+		ta->badLogicOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isBool() && Exp2Type->isBool()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badLogicOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void OrNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -210,35 +499,320 @@ void OrNode::typeAnalysis(TypeAnalysis* ta){
 	const DataType * Exp1Type = ta->nodeType(myExp1);
 	const DataType * Exp2Type = ta->nodeType(myExp2);
 	/*
-	check if they are functions, check if they are bools,
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isBool())
+	{
+		ta->badLogicOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isBool())
+	{
+		ta->badLogicOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isBool() && Exp2Type->isBool()){
+			ta->nodeType(this, Exp2Type);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badLogicOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
+}
+void EqualsNode::typeAnalysis(TypeAnalysis* ta){
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are the same type,
 	check if the ptr depth is the same,
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
 }
-void EqualsNode::typeAnalysis(TypeAnalysis* ta){
-
-}
 void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
-
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are the same type,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
 }
 void LessNode::typeAnalysis(TypeAnalysis* ta){
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
+	bool valid = true;
 
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt())
+	{
+		ta->badRelOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt())
+	{
+		ta->badRelOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, BOOL);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badRelOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void GreaterNode::typeAnalysis(TypeAnalysis* ta){
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
+	bool valid = true;
 
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt())
+	{
+		ta->badRelOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt())
+	{
+		ta->badRelOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, BOOL);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badRelOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void LessEqNode::typeAnalysis(TypeAnalysis* ta){
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
+	bool valid = true;
 
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt())
+	{
+		ta->badRelOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt())
+	{
+		ta->badRelOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, BOOL);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badRelOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void GreaterEqNode::typeAnalysis(TypeAnalysis* ta){
+	myExp1->typeAnalysis(ta);
+	myExp2->typeAnalysis(ta);
+	const DataType * Exp1Type = ta->nodeType(myExp1);
+	const DataType * Exp2Type = ta->nodeType(myExp2);
+	/*
+	check if they are functions, check if they are ints,
+	check if the ptr depth is the same,
+	if all pass pass the typeAnalysis and add its type to the hashMap
+	in ta
+	*/
+	bool valid = true;
 
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+		valid = false;
+	}
+
+	//checking RHS is valid
+	if(!(Exp1Type->isInt())
+	{
+		ta->badRelOpd(myExp1->getLine(), myExp1->getCol());
+		valid = false;
+	}
+
+	//checking LHS is valid
+	if(!(Exp2Type->isInt())
+	{
+		ta->badRelOpd(myExp2->getLine(), myExp2->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		//int + int
+		if(Exp1Type->isInt() && Exp2Type->isInt()){
+			ta->nodeType(this, BOOL);
+		}
+		//types are not incompatible
+		else
+		{
+			ta->badRelOpd(this->getLine(), this->getCol);
+			ta->nodeType(this, ErrorType::produce());
+		}
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void UnaryMinusNode::typeAnalysis(TypeAnalysis* ta){
 
 }
 void NotNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * ExpType = ta->nodeType(myExp);
 
+	bool valid = true;
+
+	//checking if myexp is an error
+	if(ExpType->asError()){
+		valid = false;
+	}
+	//checking if exp is of type int or ptr
+	if(!(ExpType->isBool()))
+	{
+		ta->badLogicOpd(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	//inserting valids into hashMap
+	if(valid)
+	{
+		ta->nodeType(this, ExpType);
+	}
+
+	//not valid cases
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void ExpNode::typeAnalysis(TypeAnalysis * ta){
 	TODO("Override me in the subclass");
