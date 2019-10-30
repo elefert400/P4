@@ -208,19 +208,19 @@ void PlusNode::typeAnalysis(TypeAnalysis* ta){
 	in ta
 	*/
 	bool valid = true;
-
+	// if(Exp1Type->isBool()){
+	// 	valid = false;
+	// }
 	//checking if either is an error
 	if(Exp1Type->asError() || Exp2Type->asError()){
 		valid = false;
 	}
-
 	//checking RHS is valid
 	if(!(Exp1Type->isInt() || Exp1Type->isPtr()))
 	{
 		ta->badMathOpd(myExp1->getLine(), myExp1->getCol());
 		valid = false;
 	}
-
 	//checking LHS is valid
 	if(!(Exp2Type->isInt() || Exp2Type->isPtr()))
 	{
@@ -236,11 +236,11 @@ void PlusNode::typeAnalysis(TypeAnalysis* ta){
 			ta->nodeType(this, Exp2Type);
 		}
 		//int + ptr
-		if(Exp1Type->isInt() && Exp2Type->isPtr()){
+		else if(Exp1Type->isInt() && Exp2Type->isPtr()){
 			ta->nodeType(this, Exp2Type);
 		}
 		//ptr + int
-		if(Exp2Type->isInt() && Exp1Type->isPtr()){
+		else if(Exp2Type->isInt() && Exp1Type->isPtr()){
 			ta->nodeType(this, Exp1Type);
 		}
 		//types are not incompatible
@@ -297,11 +297,11 @@ void MinusNode::typeAnalysis(TypeAnalysis* ta){
 			ta->nodeType(this, Exp2Type);
 		}
 		//int + ptr
-		if(Exp1Type->isInt() && Exp2Type->isPtr()){
+		else if(Exp1Type->isInt() && Exp2Type->isPtr()){
 			ta->nodeType(this, Exp2Type);
 		}
 		//ptr + int
-		if(Exp2Type->isInt() && Exp1Type->isPtr()){
+		else if(Exp2Type->isInt() && Exp1Type->isPtr()){
 			ta->nodeType(this, Exp1Type);
 		}
 		//types are not incompatible
@@ -358,11 +358,11 @@ void TimesNode::typeAnalysis(TypeAnalysis* ta){
 			ta->nodeType(this, Exp2Type);
 		}
 		//int + ptr
-		if(Exp1Type->isInt() && Exp2Type->isPtr()){
+		else if(Exp1Type->isInt() && Exp2Type->isPtr()){
 			ta->nodeType(this, Exp2Type);
 		}
 		//ptr + int
-		if(Exp2Type->isInt() && Exp1Type->isPtr()){
+		else if(Exp2Type->isInt() && Exp1Type->isPtr()){
 			ta->nodeType(this, Exp1Type);
 		}
 		//types are not incompatible
@@ -419,11 +419,11 @@ void DivideNode::typeAnalysis(TypeAnalysis* ta){
 			ta->nodeType(this, Exp2Type);
 		}
 		//int + ptr
-		if(Exp1Type->isInt() && Exp2Type->isPtr()){
+		else if(Exp1Type->isInt() && Exp2Type->isPtr()){
 			ta->nodeType(this, Exp2Type);
 		}
 		//ptr + int
-		if(Exp2Type->isInt() && Exp1Type->isPtr()){
+		else if(Exp2Type->isInt() && Exp1Type->isPtr()){
 			ta->nodeType(this, Exp1Type);
 		}
 		//types are not incompatible
@@ -472,17 +472,8 @@ void AndNode::typeAnalysis(TypeAnalysis* ta){
 
 	//inserting valids into the HashMap
 	if(valid)
-	{
-		//int + int
-	  if(Exp1Type->isBool() && Exp2Type->isBool()){
+	{	//bool && bool
 	    ta->nodeType(this, Exp2Type);
-	  }
-	  //types are not incompatible
-	  else
-	  {
-	    ta->badLogicOpd(this->getLine(), this->getCol());
-	    ta->nodeType(this, ErrorType::produce());
-	  }
 	}
 
 	//not valid cases
@@ -523,17 +514,8 @@ void OrNode::typeAnalysis(TypeAnalysis* ta){
 
 	//inserting valids into the HashMap
 	if(valid)
-	{
-		//int + int
-	  if(Exp1Type->isBool() && Exp2Type->isBool()){
+	{	//bool && bool
 	    ta->nodeType(this, Exp2Type);
-	  }
-	  //types are not incompatible
-	  else
-	  {
-	    ta->badLogicOpd(this->getLine(), this->getCol());
-	    ta->nodeType(this, ErrorType::produce());
-	  }
 	}
 
 	//not valid cases
@@ -827,7 +809,11 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 
 	const DataType * tgtType = ta->nodeType(myTgt);
 	const DataType * srcType = ta->nodeType(mySrc);
-
+	bool valid = true;
+	if(tgtType->asError() || srcType->asError()){
+		ta->nodeType(this, ErrorType::produce());
+		return;
+	}
 	//While incomplete, this gives you one case for
 	// assignment: if the types are exactly the same
 	// it is usually ok to do the assignment. One
@@ -839,8 +825,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		return;
 	}
 	if (tgtType == srcType){
-		// if(ta->passed())
-		//ta->nodeType(this, VarType::VOID());
+		ta->nodeType(this, tgtType);
 		return;
 	}
 
