@@ -179,13 +179,90 @@ void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
 
 }
 void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	myStmts->typeAnalysis(ta);
+	const DataType * expType = ta->nodeType(myExp);
+	const DataType * stmtType = ta->nodeType(myStmts);
 
+	bool valid = true;
+
+	if(expType->asError() || stmtType->asError())
+	{
+		valid = false;
+	}
+
+	if(!(expType->isBool()))
+	{
+		ta->badIfCond(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	myStmtsT->typeAnalysis(ta);
+	myStmtsF->typeAnalysis(ta);
+	const DataType * expType = ta->nodeType(myExp);
+	const DataType * stmtTypeT = ta->nodeType(myStmtsT);
+	const DataType * stmtTypeF = ta->nodeType(myStmtsF);
 
+	bool valid = true;
+
+	if(expType->asError() || stmtTypeT->asError() || stmtTypeF->asError())
+	{
+		valid = false;
+	}
+
+	if(!(expType->isBool()))
+	{
+		ta->badIfCond(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	myStmts->typeAnalysis(ta);
+	const DataType * expType = ta->nodeType(myExp);
+	const DataType * stmtType = ta->nodeType(myStmts);
 
+	bool valid = true;
+
+	if(expType->asError() || stmtType->asError())
+	{
+		valid = false;
+	}
+
+	if(!(expType->isBool()))
+	{
+		ta->badWhileCond(myExp->getLine(), myExp->getCol());
+		valid = false;
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta){
 
