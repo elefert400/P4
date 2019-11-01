@@ -173,10 +173,66 @@ void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
 	}
 }
 void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * expType = ta->nodeType(myExp);
 
+	bool valid = true;
+
+	if(expType->asError())
+	{
+			valid = false;
+	}
+
+	if(expType->asFn())
+	{
+		ta->readFn(this->getLine(), this->getCol());
+		valid = false;
+	}
+	if(expType->isPtr())
+	{
+		ta->badReadPtr(this->getLine(), this->getCol());
+		valid = false;
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * expType = ta->nodeType(myExp);
 
+	bool valid = true;
+
+	if(expType->asError())
+	{
+		valid = false;
+	}
+
+	if(expType->asFn())
+	{
+		ta->writeFn(this->getLine(), this->getCol());
+		valid = false;
+	}
+	if(expType->isVoid())
+	{
+		ta->badWriteVoid(this->getLine(), this->getCol());
+		valid = false;
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
 	myExp->typeAnalysis(ta);
