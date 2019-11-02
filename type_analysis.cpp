@@ -981,8 +981,31 @@ void GreaterEqNode::typeAnalysis(TypeAnalysis* ta){
 	  ta->nodeType(this, ErrorType::produce());
 	}
 }
+//negative numbers
 void UnaryMinusNode::typeAnalysis(TypeAnalysis* ta){
+	myExp->typeAnalysis(ta);
+	const DataType * ExpType = ta->nodeType(myExp);
 
+	bool valid = true;
+	if(ExpType->asError())
+	{
+		valid = false;
+	}
+
+	if(!(ExpType->isInt()))
+	{
+		valid = false;
+		ta->badMathOpr(this->getLine(), this->getCol());
+	}
+
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(INT));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void NotNode::typeAnalysis(TypeAnalysis* ta){
 	myExp->typeAnalysis(ta);
