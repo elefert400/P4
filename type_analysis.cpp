@@ -38,7 +38,6 @@ void ProgramNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void DeclListNode::typeAnalysis(TypeAnalysis * ta){
-	std::cout << myDecls->size() << "\n";
 	ta->nodeType(this, VarType::produce(VOID));
 
 	for (auto decl : *myDecls){
