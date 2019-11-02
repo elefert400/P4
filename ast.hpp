@@ -191,6 +191,7 @@ public:
 	}
 	void unparse(std::ostream& out, int indent) override;
 	bool nameAnalysis(SymbolTable * symTab) override;
+	void typeAnalysis(TypeAnalysis* ta);
 	size_t size(){ return myExps->size(); }
 private:
 	std::list<ExpNode *> * myExps;

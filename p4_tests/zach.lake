@@ -1,6 +1,16 @@
+bool a(){
+    
+}
+int b(){
+
+}
+int foo(bool first, int second){
+
+}
 int main(){
     int x;
     int y;
     bool z;
-    y++;
+    z = foo(b(), a()); 
+
 }

@@ -38,18 +38,16 @@ void ProgramNode::typeAnalysis(TypeAnalysis * ta){
 }
 
 void DeclListNode::typeAnalysis(TypeAnalysis * ta){
-
+	std::cout << myDecls->size() << "\n";
 	ta->nodeType(this, VarType::produce(VOID));
 
 	for (auto decl : *myDecls){
 		//Do typeAnalysis on the single decl
 		decl->typeAnalysis(ta);
-
 		//Lookup the type that we added
 		// to the ta in the recursive call
 		// above
 		auto eltType = ta->nodeType(decl);
-
 		//If the element type was the special
 		// "error" type, set this node to the errorType
 		if (eltType->asError()){
@@ -69,8 +67,14 @@ void FnDeclNode::typeAnalysis(TypeAnalysis * ta){
 	// the current function
 
 	//Note, this function may need extra code
-
-	return myBody->typeAnalysis(ta);
+	myBody->typeAnalysis(ta);
+	const DataType* myBodyType = ta->nodeType(myBody);
+	if(myBodyType->asError()){
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
 }
 
 void FnBodyNode::typeAnalysis(TypeAnalysis * ta){
@@ -79,14 +83,36 @@ void FnBodyNode::typeAnalysis(TypeAnalysis * ta){
 	// second argument to StmtList::typeAnalysis
 
 	//Note, this function may need extra code
-
-	return myStmtList->typeAnalysis(ta);
+	myStmtList->typeAnalysis(ta);
+	const DataType* myStmtListType = ta->nodeType(myStmtList);
+	if(myStmtListType->asError()){
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
 }
 
 void StmtListNode::typeAnalysis(TypeAnalysis * ta){
 	//Note, this function may need extra code
+	bool valid = true;
+	const DataType* myType;
 	for (auto stmt : *myStmts){
+		
 		stmt->typeAnalysis(ta);
+		myType = ta->nodeType(stmt);
+		if(myType->asError())
+		{
+			valid = false;
+		}
+	}
+	if(valid)
+	{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
+	else
+	{
+		ta->nodeType(this, ErrorType::produce());
 	}
 }
 
@@ -323,10 +349,69 @@ void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
 void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta){
 
 }
+void ExpListNode::typeAnalysis(TypeAnalysis* ta){
+	std::list<const DataType*> * argsList = new std::list<const DataType*>();
+	for(std::list<ExpNode*>::iterator it=myExps->begin(); it != myExps->end(); ++it){
+		
+		(*it)->typeAnalysis(ta);
+		argsList->push_back(ta->nodeType(*it));
+	}
+	TupleType* myTuple = new TupleType(argsList);
+	ta->nodeType(this, myTuple);
+}
 void CallStmtNode::typeAnalysis(TypeAnalysis* ta){
-
+	myCallExp->typeAnalysis(ta);
+	const DataType* callType = ta->nodeType(myCallExp);
+	bool valid = true;
+	if(callType->asError()){
+		valid = false;
+	}
+	//not a function so report an error
+	if(callType->asFn() == nullptr){
+		ta->badCallee(this->getLine(), this->getCol());
+		valid = false;
+	}
+	if(!valid){
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
 }
 void CallExpNode::typeAnalysis(TypeAnalysis* ta){
+	bool valid = true;
+	myId->typeAnalysis(ta);
+	myExpList->typeAnalysis(ta);
+	const FnType* idFnType = static_cast<const FnType*>(ta->nodeType(myId));
+	const TupleType*  argsType = static_cast<const TupleType*>(ta->nodeType(myExpList));
+	if(idFnType->asError() || idFnType->asError()){
+		
+		valid = false;
+	}
+	//const TupleType * idArgsType = idFnType->getFormalTypes();
+	std::list<const DataType *> * listExpectedArgs = idFnType->getFormalTypes()->getElts();
+	std::list<const DataType *> * listGivenArgs = argsType->getElts();
+	if(listExpectedArgs->size() != listGivenArgs->size()){
+		ta->badArgCount(myId->getLine(), myId->getCol());
+		valid = false;
+	}
+	std::list<const DataType *>::iterator l1 = listExpectedArgs->begin();
+	std::list<const DataType *>::iterator l2 = listGivenArgs->begin();
+	while(l1 != listExpectedArgs->end() && l2 != listGivenArgs->end()){
+		if((*l1)->getString() != (*l2)->getString()){
+			ta->badArgMatch(myId->getLine(),(myId->getCol() + myId->getSymbol()->getName().length() + 1));
+			valid = false;
+		}
+		++l1;
+		++l2;
+	}
+	
+	if(!valid){
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, static_cast<const FnType*>(ta->nodeType(myId))->getReturnType());
+	}
 
 }
 void PlusNode::typeAnalysis(TypeAnalysis* ta){
@@ -1000,7 +1085,17 @@ void IdNode::typeAnalysis(TypeAnalysis * ta){
 	ta->nodeType(this, this->getSymbol()->getType());
 }
 void DerefNode::typeAnalysis(TypeAnalysis * ta){
+	myTgt->typeAnalysis(ta);
+	
+	const DataType * tgtType = ta->nodeType(myTgt);
 
+	if(!(tgtType->isPtr())){
+		ta->badDeref(this->getLine(), this->getCol());
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, tgtType);
+	}
 }
 void IntLitNode::typeAnalysis(TypeAnalysis * ta){
 	// IntLits never fail their type analysis and always
