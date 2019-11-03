@@ -381,29 +381,46 @@ void CallExpNode::typeAnalysis(TypeAnalysis* ta){
 	bool valid = true;
 	myId->typeAnalysis(ta);
 	myExpList->typeAnalysis(ta);
-	const FnType* idFnType = static_cast<const FnType*>(ta->nodeType(myId));
-	const TupleType*  argsType = static_cast<const TupleType*>(ta->nodeType(myExpList));
-	if(idFnType->asError() || idFnType->asError()){
-		
+	if(ta->nodeType(myId)->asFn() == nullptr){
+		ta->badCallee(myId->getLine(), myId->getCol());
 		valid = false;
 	}
-	//const TupleType * idArgsType = idFnType->getFormalTypes();
-	std::list<const DataType *> * listExpectedArgs = idFnType->getFormalTypes()->getElts();
-	std::list<const DataType *> * listGivenArgs = argsType->getElts();
-	if(listExpectedArgs->size() != listGivenArgs->size()){
-		ta->badArgCount(myId->getLine(), myId->getCol());
-		valid = false;
-	}
-	std::list<const DataType *>::iterator l1 = listExpectedArgs->begin();
-	std::list<const DataType *>::iterator l2 = listGivenArgs->begin();
-	while(l1 != listExpectedArgs->end() && l2 != listGivenArgs->end()){
-		if((*l1)->getString() != (*l2)->getString()){
-			ta->badArgMatch(myId->getLine(),(myId->getCol() + myId->getSymbol()->getName().length() + 1));
+	else{
+		const FnType* idFnType = static_cast<const FnType*>(ta->nodeType(myId));
+		const TupleType*  argsType = static_cast<const TupleType*>(ta->nodeType(myExpList));
+		if(idFnType->asError() || argsType->asError()){
+			
 			valid = false;
 		}
-		++l1;
-		++l2;
+		//const TupleType * idArgsType = idFnType->getFormalTypes();
+
+		std::list<const DataType *> * listExpectedArgs = idFnType->getFormalTypes()->getElts();
+		std::list<const DataType *> * listGivenArgs = argsType->getElts();
+		if(listExpectedArgs->size() != listGivenArgs->size()){
+			ta->badArgCount(myId->getLine(), myId->getCol());
+			valid = false;
+		}
+		std::list<const DataType *>::iterator l1 = listExpectedArgs->begin();
+		std::list<const DataType *>::iterator l2 = listGivenArgs->begin();
+		std::list<ExpNode*> * argsAsExpNodes = myExpList->getList();
+		/*getting the actual list from myExpList to iterate over simult.
+		Should be same size as listGivenArgs.*/
+		std::list<ExpNode*>::iterator l_Extra = myExpList->getList()->begin();
+
+		while(l1 != listExpectedArgs->end() && l2 != listGivenArgs->end() && l_Extra != argsAsExpNodes->end()){
+			if((*l1)->getString() != (*l2)->getString()){
+				if(!(*l2)->asError()){
+					ta->badArgMatch((*l_Extra)->getLine(),(*l_Extra)->getCol());
+				}
+				// ta->badArgMatch(myId->getLine(),(myId->getCol() + myId->getSymbol()->getName().length() + 1));
+				valid = false;
+			}
+			++l1;
+			++l2;
+			++l_Extra;
+		}
 	}
+	
 	
 	if(!valid){
 		ta->nodeType(this, ErrorType::produce());
@@ -1051,36 +1068,42 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 	const DataType * srcType = ta->nodeType(mySrc);
 	bool valid = true;
 	if(tgtType->asError() || srcType->asError()){
-		ta->nodeType(this, ErrorType::produce());
-		return;
+		// ta->nodeType(this, ErrorType::produce());
+		valid = false;
 	}
 	//While incomplete, this gives you one case for
 	// assignment: if the types are exactly the same
 	// it is usually ok to do the assignment. One
 	// exception is that if both types are function
 	// names, it should fail type analysis
-	if(tgtType->asFn() != nullptr){
+	if(tgtType->asFn() != nullptr || srcType->asFn() != nullptr){
 		ta->badAssignOpd(this->getLine(), this->getCol());
+		//ta->nodeType(this, ErrorType::produce());
+		valid = false;
+	}
+	else if(srcType->asFn() != nullptr){
+		ta->badAssignOpd(mySrc->getLine(), myTgt->getCol());
+		//ta->nodeType(this, ErrorType::produce());
+		valid = false;
+	}
+	
+	if(!valid){	
+		//Some functions are already defined for you to
+		// report type errors. Note that these functions
+		// also tell the typeAnalysis object that the
+		// analysis has failed, meaning that main.cpp
+		// will print "Type check failed" at the end
+		ta->badAssignOpr(this->getLine(), this->getCol());
+
+
+		//Note that reporting an error does not set the
+		// type of the current node, so setting the node
+		// type must be done
 		ta->nodeType(this, ErrorType::produce());
-		return;
 	}
-	if (tgtType == srcType){
+	else if (tgtType == srcType){
 		ta->nodeType(this, tgtType);
-		return;
 	}
-
-	//Some functions are already defined for you to
-	// report type errors. Note that these functions
-	// also tell the typeAnalysis object that the
-	// analysis has failed, meaning that main.cpp
-	// will print "Type check failed" at the end
-	ta->badAssignOpr(this->getLine(), this->getCol());
-
-
-	//Note that reporting an error does not set the
-	// type of the current node, so setting the node
-	// type must be done
-	ta->nodeType(this, ErrorType::produce());
 }
 
 void DeclNode::typeAnalysis(TypeAnalysis * ta){

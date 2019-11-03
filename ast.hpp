@@ -193,6 +193,7 @@ public:
 	bool nameAnalysis(SymbolTable * symTab) override;
 	void typeAnalysis(TypeAnalysis* ta);
 	size_t size(){ return myExps->size(); }
+	std::list<ExpNode *> * getList(){ return myExps; }
 private:
 	std::list<ExpNode *> * myExps;
 };

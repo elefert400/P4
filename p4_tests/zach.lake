@@ -11,6 +11,6 @@ int main(){
     int x;
     int y;
     bool z;
-    z = foo(b(), a()); 
-
+    z = foo(b(), a());
+    
 }
