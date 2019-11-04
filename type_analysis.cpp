@@ -97,7 +97,7 @@ void StmtListNode::typeAnalysis(TypeAnalysis * ta, TypeNode* fnRetType){
 	bool valid = true;
 	const DataType* myType;
 	for (auto stmt : *myStmts){
-		
+
 		stmt->typeAnalysis(ta, fnRetType);
 		myType = ta->nodeType(stmt);
 		if(myType->asError())
@@ -369,12 +369,12 @@ void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 			//non-void fn
 			else{
 				//match types, return error if they do not match
-				if((expType->isInt() && fnRetType->getDataType()->isInt()) || 
+				if((expType->isInt() && fnRetType->getDataType()->isInt()) ||
 					(expType->isBool() && fnRetType->getDataType()->isBool())){
 					//Pointer: int OR bool
 					if(expType->isPtr() && fnRetType->getDataType()->isPtr()){
 						//check mismatched pointer depth
-						if(static_cast<const VarType*>(fnRetType->getDataType())->getDepth() 
+						if(static_cast<const VarType*>(fnRetType->getDataType())->getDepth()
 										!= static_cast<const VarType*>(expType)->getDepth()){
 							ta->badRetValue(myExp->getLine(), myExp->getCol());
 							valid = false;
@@ -404,7 +404,7 @@ void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 void ExpListNode::typeAnalysis(TypeAnalysis* ta){
 	std::list<const DataType*> * argsList = new std::list<const DataType*>();
 	for(std::list<ExpNode*>::iterator it=myExps->begin(); it != myExps->end(); ++it){
-		
+
 		(*it)->typeAnalysis(ta);
 		argsList->push_back(ta->nodeType(*it));
 	}
@@ -419,7 +419,7 @@ void CallStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 		valid = false;
 	}
 	//not a function so report an error
-	if(callType->asFn() == nullptr){
+	else if(callType->asVar() == nullptr){
 		ta->badCallee(this->getLine(), this->getCol());
 		valid = false;
 	}
@@ -442,7 +442,7 @@ void CallExpNode::typeAnalysis(TypeAnalysis* ta){
 		const FnType* idFnType = static_cast<const FnType*>(ta->nodeType(myId));
 		const TupleType*  argsType = static_cast<const TupleType*>(ta->nodeType(myExpList));
 		if(idFnType->asError() || argsType->asError()){
-			
+
 			valid = false;
 		}
 		//const TupleType * idArgsType = idFnType->getFormalTypes();
@@ -473,8 +473,8 @@ void CallExpNode::typeAnalysis(TypeAnalysis* ta){
 			++l_Extra;
 		}
 	}
-	
-	
+
+
 	if(!valid){
 		ta->nodeType(this, ErrorType::produce());
 	}
@@ -829,8 +829,8 @@ void EqualsNode::typeAnalysis(TypeAnalysis* ta){
 	}
 
 	//checking RHS is valid
-	if(Exp1Type->asVar() == nullptr || 
-		Exp2Type->asVar() == nullptr || 
+	if(Exp1Type->asVar() == nullptr ||
+		Exp2Type->asVar() == nullptr ||
 		Exp1Type->isVoid() ||
 		Exp2Type->isVoid()){
 			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
@@ -881,17 +881,17 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 	}
 
 	//checking RHS is valid
-	if(Exp1Type->asVar() == nullptr || 
-		Exp2Type->asVar() == nullptr || 
+	if(Exp1Type->asVar() == nullptr ||
+		Exp2Type->asVar() == nullptr ||
 		Exp1Type->isVoid() ||
 		Exp2Type->isVoid()){
 			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
 			valid = false;
 		}
-	
+
 	//checking LHS is valid
 	else if(Exp1Type->isBool() != Exp2Type->isBool()){
-		
+
 		ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
 	  	valid = false;
 	}
@@ -1220,8 +1220,8 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		ta->badAssignOpd(mySrc->getLine(), myTgt->getCol());
 		//ta->nodeType(this, ErrorType::produce());
 		valid = false;
-	}	
-	if(!valid){	
+	}
+	if(!valid){
 		//Some functions are already defined for you to
 		// report type errors. Note that these functions
 		// also tell the typeAnalysis object that the
@@ -1267,7 +1267,7 @@ void IdNode::typeAnalysis(TypeAnalysis * ta){
 }
 void DerefNode::typeAnalysis(TypeAnalysis * ta){
 	myTgt->typeAnalysis(ta);
-	
+
 	const DataType * tgtType = ta->nodeType(myTgt);
 	// if(tgtType->asError())
 	// {
