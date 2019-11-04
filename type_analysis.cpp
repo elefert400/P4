@@ -66,7 +66,7 @@ void FnDeclNode::typeAnalysis(TypeAnalysis * ta){
 	// the current function
 
 	//Note, this function may need extra code
-	myBody->typeAnalysis(ta);
+	myBody->typeAnalysis(ta, myRetAST);
 	const DataType* myBodyType = ta->nodeType(myBody);
 	if(myBodyType->asError()){
 		ta->nodeType(this, ErrorType::produce());
@@ -76,13 +76,13 @@ void FnDeclNode::typeAnalysis(TypeAnalysis * ta){
 	}
 }
 
-void FnBodyNode::typeAnalysis(TypeAnalysis * ta){
+void FnBodyNode::typeAnalysis(TypeAnalysis * ta, TypeNode* fnRetType){
 	//HINT: as above, you may want to pass the
 	// fnDecl's type into the statement list as a
 	// second argument to StmtList::typeAnalysis
 
 	//Note, this function may need extra code
-	myStmtList->typeAnalysis(ta);
+	myStmtList->typeAnalysis(ta, fnRetType);
 	const DataType* myStmtListType = ta->nodeType(myStmtList);
 	if(myStmtListType->asError()){
 		ta->nodeType(this, ErrorType::produce());
@@ -92,13 +92,13 @@ void FnBodyNode::typeAnalysis(TypeAnalysis * ta){
 	}
 }
 
-void StmtListNode::typeAnalysis(TypeAnalysis * ta){
+void StmtListNode::typeAnalysis(TypeAnalysis * ta, TypeNode* fnRetType){
 	//Note, this function may need extra code
 	bool valid = true;
 	const DataType* myType;
 	for (auto stmt : *myStmts){
 		
-		stmt->typeAnalysis(ta);
+		stmt->typeAnalysis(ta, fnRetType);
 		myType = ta->nodeType(stmt);
 		if(myType->asError())
 		{
@@ -115,11 +115,11 @@ void StmtListNode::typeAnalysis(TypeAnalysis * ta){
 	}
 }
 
-void StmtNode::typeAnalysis(TypeAnalysis * ta){
+void StmtNode::typeAnalysis(TypeAnalysis * ta, TypeNode* fnRetType){
 	TODO("Implement me in the subclass");
 }
 
-void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
+void AssignStmtNode::typeAnalysis(TypeAnalysis * ta, TypeNode* fnRetType){
 
 	myAssign->typeAnalysis(ta);
 
@@ -139,7 +139,7 @@ void AssignStmtNode::typeAnalysis(TypeAnalysis * ta){
 	}
 }
 
-void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta){
+void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
 	const DataType * ExpType = ta->nodeType(myExp);
 
@@ -168,7 +168,7 @@ void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
+void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
 	const DataType * ExpType = ta->nodeType(myExp);
 
@@ -197,7 +197,7 @@ void PostDecStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
+void ReadStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
 	const DataType * expType = ta->nodeType(myExp);
 
@@ -228,7 +228,7 @@ void ReadStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
+void WriteStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
 	const DataType * expType = ta->nodeType(myExp);
 
@@ -259,9 +259,9 @@ void WriteStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
+void IfStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
-	myStmts->typeAnalysis(ta);
+	myStmts->typeAnalysis(ta, fnRetType);
 	const DataType * expType = ta->nodeType(myExp);
 	const DataType * stmtType = ta->nodeType(myStmts);
 
@@ -287,10 +287,10 @@ void IfStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta){
+void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
-	myStmtsT->typeAnalysis(ta);
-	myStmtsF->typeAnalysis(ta);
+	myStmtsT->typeAnalysis(ta, fnRetType);
+	myStmtsF->typeAnalysis(ta, fnRetType);
 	const DataType * expType = ta->nodeType(myExp);
 	const DataType * stmtTypeT = ta->nodeType(myStmtsT);
 	const DataType * stmtTypeF = ta->nodeType(myStmtsF);
@@ -317,9 +317,9 @@ void IfElseStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
+void WhileStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myExp->typeAnalysis(ta);
-	myStmts->typeAnalysis(ta);
+	myStmts->typeAnalysis(ta, fnRetType);
 	const DataType * expType = ta->nodeType(myExp);
 	const DataType * stmtType = ta->nodeType(myStmts);
 
@@ -345,8 +345,61 @@ void WhileStmtNode::typeAnalysis(TypeAnalysis* ta){
 		ta->nodeType(this, ErrorType::produce());
 	}
 }
-void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta){
-
+void ReturnStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
+	bool valid = true;
+	// if(myExp == nullptr && fnRetType->getDataType()->isVoid()){
+	// 	//valid
+	// }
+	if(myExp == nullptr && !fnRetType->getDataType()->isVoid()){
+		ta->badNoRet(this->getLine(), this->getCol());
+		valid = false;
+	}
+	else if(myExp != nullptr){
+		myExp->typeAnalysis(ta);
+		const DataType * expType = ta->nodeType(myExp);
+		if(!expType->asError()){
+			//check if we are in void fn
+			if(fnRetType->getDataType()->isVoid()){
+				//both are void
+				if(!expType->isVoid()){
+					ta->extraRetValue(myExp->getLine(), myExp->getCol());
+					valid = false;
+				}
+			}
+			//non-void fn
+			else{
+				//match types, return error if they do not match
+				if((expType->isInt() && fnRetType->getDataType()->isInt()) || 
+					(expType->isBool() && fnRetType->getDataType()->isBool())){
+					//Pointer: int OR bool
+					if(expType->isPtr() && fnRetType->getDataType()->isPtr()){
+						//check mismatched pointer depth
+						if(static_cast<const VarType*>(fnRetType->getDataType())->getDepth() 
+										!= static_cast<const VarType*>(expType)->getDepth()){
+							ta->badRetValue(myExp->getLine(), myExp->getCol());
+							valid = false;
+						}
+						//else fell through to here, pointer depths match
+					}
+					// else{
+					// 	ta->badRetValue(myExp->getLine(), myExp->getCol());
+					// 	valid = false;
+					// }
+					//else fell through to here, matched types successfully
+				}
+				else{
+					ta->badRetValue(myExp->getLine(), myExp->getCol());
+					valid = false;
+				}
+			}
+		}
+	}
+	if(!valid){
+		ta->nodeType(this, ErrorType::produce());
+	}
+	else{
+		ta->nodeType(this, VarType::produce(VOID));
+	}
 }
 void ExpListNode::typeAnalysis(TypeAnalysis* ta){
 	std::list<const DataType*> * argsList = new std::list<const DataType*>();
@@ -358,7 +411,7 @@ void ExpListNode::typeAnalysis(TypeAnalysis* ta){
 	TupleType* myTuple = new TupleType(argsList);
 	ta->nodeType(this, myTuple);
 }
-void CallStmtNode::typeAnalysis(TypeAnalysis* ta){
+void CallStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	myCallExp->typeAnalysis(ta);
 	const DataType* callType = ta->nodeType(myCallExp);
 	bool valid = true;
@@ -768,6 +821,46 @@ void EqualsNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+	  valid = false;
+	}
+
+	//checking RHS is valid
+	if(Exp1Type->asVar() == nullptr || 
+		Exp2Type->asVar() == nullptr || 
+		Exp1Type->isVoid() ||
+		Exp2Type->isVoid()){
+			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			valid = false;
+		}
+	//checking LHS is valid
+	else if(Exp1Type->isBool() != Exp2Type->isBool()){
+		ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
+	  	valid = false;
+	}
+	else if(Exp1Type->isInt() != Exp2Type->isInt()){
+		ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
+	  	valid = false;
+	}
+	else if(Exp1Type->isPtr() == Exp2Type->isPtr()){
+		if(Exp1Type->asVar()->getDepth() != Exp2Type->asVar()->getDepth()){
+			ta->badEqOpr(myExp2->getLine(), myExp2->getCol());
+			valid = false;
+		}
+	}
+	//inserting valids into the HashMap
+	if(valid)
+	{	//bool && bool
+	    ta->nodeType(this, Exp2Type);
+	}
+
+	//not valid cases
+	else{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -780,6 +873,48 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 	if all pass pass the typeAnalysis and add its type to the hashMap
 	in ta
 	*/
+	bool valid = true;
+
+	//checking if either is an error
+	if(Exp1Type->asError() || Exp2Type->asError()){
+	  valid = false;
+	}
+
+	//checking RHS is valid
+	if(Exp1Type->asVar() == nullptr || 
+		Exp2Type->asVar() == nullptr || 
+		Exp1Type->isVoid() ||
+		Exp2Type->isVoid()){
+			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			valid = false;
+		}
+	
+	//checking LHS is valid
+	else if(Exp1Type->isBool() != Exp2Type->isBool()){
+		
+		ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
+	  	valid = false;
+	}
+	else if(Exp1Type->isInt() != Exp2Type->isInt()){
+		ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
+	  	valid = false;
+	}
+	else if(Exp1Type->isPtr() == Exp2Type->isPtr()){
+		if(Exp1Type->asVar()->getDepth() != Exp2Type->asVar()->getDepth()){
+			ta->badEqOpr(myExp1->getLine(), myExp1->getCol());
+			valid = false;
+		}
+	}
+	//inserting valids into the HashMap
+	if(valid)
+	{	//bool && bool
+	    ta->nodeType(this, Exp2Type);
+	}
+
+	//not valid cases
+	else{
+		ta->nodeType(this, ErrorType::produce());
+	}
 }
 void LessNode::typeAnalysis(TypeAnalysis* ta){
 	myExp1->typeAnalysis(ta);
@@ -1085,8 +1220,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		ta->badAssignOpd(mySrc->getLine(), myTgt->getCol());
 		//ta->nodeType(this, ErrorType::produce());
 		valid = false;
-	}
-	
+	}	
 	if(!valid){	
 		//Some functions are already defined for you to
 		// report type errors. Note that these functions
@@ -1128,16 +1262,32 @@ void IdNode::typeAnalysis(TypeAnalysis * ta){
 	// yield the type of their symbol (which
 	// depends on their definition)
 	ta->nodeType(this, this->getSymbol()->getType());
+	// const DataType * tgtType = ta->nodeType(this);
+	// std::cout << tgtType->isPtr() << "\n";
 }
 void DerefNode::typeAnalysis(TypeAnalysis * ta){
 	myTgt->typeAnalysis(ta);
 	
 	const DataType * tgtType = ta->nodeType(myTgt);
+	// if(tgtType->asError())
+	// {
+
+	// 	ta->nodeType(this, ErrorType::produce());
+	// 	return;
+	// }
 
 	if(!(tgtType->isPtr())){
 		ta->badDeref(this->getLine(), this->getCol());
 		ta->nodeType(this, ErrorType::produce());
 	}
+	// else if(ta->nodeType(myTgt)->asVar()->getDerefType() != nullptr){
+	// 	ta->badDeref(this->getLine(), this->getCol());
+	// 	ta->nodeType(this, ErrorType::produce());
+	// }
+	// else if(static_cast<const VarType*>(tgtType->asVar())->getDepth() == 1){
+	// 	ta->badDeref(this->getLine(), this->getCol());
+	//  	ta->nodeType(this, ErrorType::produce());
+	//  }
 	else{
 		ta->nodeType(this, tgtType);
 	}

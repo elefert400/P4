@@ -1,8 +1,9 @@
-bool a(){
-    
+void a(){
+    return(1);
 }
 int b(){
-
+    int a;
+    return(a);
 }
 int foo(bool first, int second){
 

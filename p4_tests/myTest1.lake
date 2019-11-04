@@ -1,0 +1,10 @@
+int foo(){
+    return(1);
+}
+int main(){
+    bool cond;
+    cond = false;
+    if(cond){
+        write(cond != foo());
+    }
+}
