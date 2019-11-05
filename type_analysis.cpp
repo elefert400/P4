@@ -847,7 +847,7 @@ void EqualsNode::typeAnalysis(TypeAnalysis* ta){
 	}
 	else if(Exp1Type->isPtr() == Exp2Type->isPtr()){
 		if(Exp1Type->asVar()->getDepth() != Exp2Type->asVar()->getDepth()){
-			ta->badEqOpr(myExp2->getLine(), myExp2->getCol());
+			ta->badEqOpr(this->getLine(), this->getCol());
 			valid = false;
 		}
 	}
@@ -874,7 +874,6 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 	in ta
 	*/
 	bool valid = true;
-
 	//checking if either is an error
 	if(Exp1Type->asError() || Exp2Type->asError()){
 	  valid = false;
@@ -885,7 +884,7 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 		Exp2Type->asVar() == nullptr || 
 		Exp1Type->isVoid() ||
 		Exp2Type->isVoid()){
-			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			ta->badEqOpd(this->getLine(), this->getCol());
 			valid = false;
 		}
 	
@@ -1267,29 +1266,31 @@ void IdNode::typeAnalysis(TypeAnalysis * ta){
 }
 void DerefNode::typeAnalysis(TypeAnalysis * ta){
 	myTgt->typeAnalysis(ta);
-	
+	bool valid = true;
 	const DataType * tgtType = ta->nodeType(myTgt);
-	// if(tgtType->asError())
-	// {
-
-	// 	ta->nodeType(this, ErrorType::produce());
-	// 	return;
-	// }
-
-	if(!(tgtType->isPtr())){
+	const DataType * tgtCheck;
+	if(tgtType->asError())
+	{
+		valid = false;
+		// ta->nodeType(this, ErrorType::produce());
+		// return;
+	}
+	else{
+		tgtCheck = tgtType->asVar()->getDerefType();
+	}
+	if(tgtCheck == nullptr){
 		ta->badDeref(this->getLine(), this->getCol());
+		valid = false;
+	}
+	// else if(tgtCheck->asVar()->getDepth() >= 0){
+	// 	ta->nodeType(this, tgtCheck);
+	// }
+	if(!valid){
+		
 		ta->nodeType(this, ErrorType::produce());
 	}
-	// else if(ta->nodeType(myTgt)->asVar()->getDerefType() != nullptr){
-	// 	ta->badDeref(this->getLine(), this->getCol());
-	// 	ta->nodeType(this, ErrorType::produce());
-	// }
-	// else if(static_cast<const VarType*>(tgtType->asVar())->getDepth() == 1){
-	// 	ta->badDeref(this->getLine(), this->getCol());
-	//  	ta->nodeType(this, ErrorType::produce());
-	//  }
 	else{
-		ta->nodeType(this, tgtType);
+		ta->nodeType(this, tgtCheck);
 	}
 }
 void IntLitNode::typeAnalysis(TypeAnalysis * ta){
