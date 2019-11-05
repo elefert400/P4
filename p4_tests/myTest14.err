@@ -1,0 +1,4 @@
+7,8: Logical operator applied to non-bool operand
+11,12: Logical operator applied to non-bool operand
+14,12: Logical operator applied to non-bool operand
+Type checking failed

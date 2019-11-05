@@ -1234,8 +1234,19 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		// type must be done
 		ta->nodeType(this, ErrorType::produce());
 	}
-	else if (tgtType == srcType){
-		ta->nodeType(this, tgtType);
+	else if (tgtType->asVar()->getBaseType() == srcType->asVar()->getBaseType()){
+		if(tgtType->asVar()->isPtr() || srcType->asVar()->isPtr()){
+			if(tgtType->asVar()->getDepth() == srcType->asVar()->getDepth()){
+				ta->nodeType(this, tgtType);
+			}
+			else{
+				ta->badDeref(this->getLine(), this->getCol());
+				ta->nodeType(this, ErrorType::produce());
+			}
+		}
+		else{
+			ta->nodeType(this, tgtType);
+		}
 	}
 }
 
