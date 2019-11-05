@@ -833,7 +833,12 @@ void EqualsNode::typeAnalysis(TypeAnalysis* ta){
 		Exp2Type->asVar() == nullptr ||
 		Exp1Type->isVoid() ||
 		Exp2Type->isVoid()){
-			ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			if(Exp1Type->isVoid() || (Exp1Type->asVar() == nullptr)){
+				ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			}
+			if(Exp2Type->isVoid() || (Exp2Type->asVar() == nullptr)){
+				ta->badEqOpd(myExp2->getLine(), myExp2->getCol());
+			}
 			valid = false;
 		}
 	//checking LHS is valid
@@ -884,7 +889,12 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 		Exp2Type->asVar() == nullptr ||
 		Exp1Type->isVoid() ||
 		Exp2Type->isVoid()){
-			ta->badEqOpd(this->getLine(), this->getCol());
+			if(Exp1Type->isVoid() || (Exp1Type->asVar() == nullptr)){
+				ta->badEqOpd(myExp1->getLine(), myExp1->getCol());
+			}
+			if(Exp2Type->isVoid() || (Exp2Type->asVar() == nullptr)){
+				ta->badEqOpd(myExp2->getLine(), myExp2->getCol());
+			}
 			valid = false;
 		}
 
@@ -1211,7 +1221,12 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 	// exception is that if both types are function
 	// names, it should fail type analysis
 	else if(tgtType->asFn() != nullptr || srcType->asFn() != nullptr){
-		ta->badAssignOpd(this->getLine(), this->getCol());
+		if(tgtType->asFn() != nullptr){
+			ta->badAssignOpd(myTgt->getLine(), myTgt->getCol());
+		}
+		if(srcType->asFn() != nullptr){
+			ta->badAssignOpd(mySrc->getLine(), mySrc->getCol());
+		}
 		//ta->nodeType(this, ErrorType::produce());
 		valid = false;
 	}
