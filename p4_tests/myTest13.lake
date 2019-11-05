@@ -1,0 +1,18 @@
+int main(){
+int j;
+  int x;
+  bool y;
+  bool z;
+
+  z = x < y;
+  z = x < j;
+
+  z = x > y;
+  z = x > j;
+
+  z = x >= y;
+  z = x >= j;
+
+  z = x <= y;
+  z = x <= j;
+}

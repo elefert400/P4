@@ -1,0 +1,11 @@
+int main()
+{
+  bool x;
+  int y;
+
+  if(x){}
+  if(y){}
+
+  while(x){}
+  while(y){ }
+}

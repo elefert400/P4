@@ -46,33 +46,33 @@ public:
 protected:
 };
 
-//This DataType subclass is the superclass for all Lake types. 
-// Note that there is exactly one instance of this 
+//This DataType subclass is the superclass for all Lake types.
+// Note that there is exactly one instance of this
 class ErrorType : public DataType{
 public:
 	static ErrorType * produce(){
-		//Note: this static member will only ever be initialized 
+		//Note: this static member will only ever be initialized
 		// ONCE, no matter how many times the function is called.
 		// That means there will only ever be 1 instance of errorType
 		// in the entire codebase.
 		static ErrorType * error = new ErrorType();
-		
+
 		return error;
 	}
 	virtual const ErrorType * asError() const override { return this; }
-	virtual std::string getString() const override { 
+	virtual std::string getString() const override {
 		return "ERROR";
 	}
 private:
-	ErrorType(){ 
-		/* private constructor, can only 
+	ErrorType(){
+		/* private constructor, can only
 		be called from produce */
 	}
 	size_t line;
 	size_t col;
 };
 
-//DataType subclass for all scalar types 
+//DataType subclass for all scalar types
 class VarType : public DataType{
 public:
 	//constructor replacement for non-pointer types
@@ -91,9 +91,9 @@ public:
 	// down: rather than having a distinct type for every base
 	// INT (for example), only one is constructed and kept in
 	// the flyweights list. That type is then re-used anywhere
-	// it's needed. 
+	// it's needed.
 
-	//Note the use of the static function declaration, which 
+	//Note the use of the static function declaration, which
 	// means that no instance of VarType is needed to call
 	// the function.
 	//constructor replacement for pointer types
@@ -105,7 +105,7 @@ public:
 		// in this function).
 		static std::list<VarType *> flyweights;
 		for(VarType * fly : flyweights){
-			if (fly->getDepth() == depth && 
+			if (fly->getDepth() == depth &&
 			    fly->getBaseType() == base){
 				return fly;
 			}
@@ -140,21 +140,21 @@ public:
 		if (depth == 0){ return nullptr; }
 		return produce(this->getBaseType(), depth - 1);
 	}
-	virtual bool isVoid() const override { 
-		return myBaseType == BaseType::VOID; 
+	virtual bool isVoid() const override {
+		return myBaseType == BaseType::VOID;
 	}
 	virtual BaseType getBaseType() const { return myBaseType; }
-	virtual size_t getDepth() const { return myDepth; } 
+	virtual size_t getDepth() const { return myDepth; }
 	virtual std::string getString() const override;
 private:
-	VarType(BaseType base, size_t depth) 
+	VarType(BaseType base, size_t depth)
 	: myBaseType(base), myDepth(depth){ }
 	BaseType myBaseType;
 	size_t myDepth;
 };
 
 // DataType subclass for tuples of types (i.e. lists of more
-// than 1 type. This is useful for expressing the types of 
+// than 1 type. This is useful for expressing the types of
 // formals lists and argument lists (and for matching them up)
 class TupleType : public DataType{
 public:
@@ -183,10 +183,10 @@ private:
 
 
 //DataType subclass to represent the type of a function. It will
-// have a list of argument types and a return type. 
+// have a list of argument types and a return type.
 class FnType : public DataType{
 public:
-	FnType(const TupleType * formalsIn, const DataType * retTypeIn) 
+	FnType(const TupleType * formalsIn, const DataType * retTypeIn)
 	: DataType(),
 	  myFormalTypes(formalsIn),
 	  myRetType(retTypeIn)
@@ -214,7 +214,7 @@ private:
 };
 
 // An instance of this class will be passed over the entire
-// AST. Rather than attaching types to each node, the 
+// AST. Rather than attaching types to each node, the
 // TypeAnalysis class contains a map from each ASTNode to it's
 // DataType. Thus, instead of attaching a type field to most nodes,
 // one can instead map the node to it's type, or lookup the node
@@ -227,14 +227,14 @@ public:
 	//The type analysis has an instance variable to say whether
 	// the analysis failed or not. Setting this variable is much
 	// less of a pain than passing a boolean all the way up to the
-	// root during the TypeAnalysis pass. 
+	// root during the TypeAnalysis pass.
 	bool passed(){
 		return !hasError;
 	}
 
-	//Set the type of a node. Note that the function name is 
+	//Set the type of a node. Note that the function name is
 	// overloaded: this 2-argument nodeType puts a value into the
-	// map with a given type. 
+	// map with a given type.
 	void nodeType(const ASTNode * node, const DataType * type){
 		nodeToType[node] = type;
 	}
@@ -251,8 +251,8 @@ public:
 		return nodeToType[node];
 	}
 
-	//The following functions all report and error and 
-	// tell the object that the analysis has failed. 
+	//The following functions all report and error and
+	// tell the object that the analysis has failed.
 
 	void badArgMatch(size_t line, size_t col){
 		hasError = true;
@@ -386,7 +386,7 @@ public:
 			<< "Attempt to write a function"
 			<< "\n";
 	}
-	
+
 	void readFn(size_t line, size_t col){
 		hasError = true;
 		std::cerr << line << "," << col << ": "

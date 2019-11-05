@@ -1,0 +1,7 @@
+int f(bool x, int y){
+return true;
+}
+int main(){
+  int z;
+  bool w;
+}

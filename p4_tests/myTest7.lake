@@ -1,0 +1,7 @@
+int f(bool x, int y){}
+int main(){
+  int z;
+  bool w;
+  f(z, w);
+  f(w, z);
+}

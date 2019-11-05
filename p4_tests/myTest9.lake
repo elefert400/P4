@@ -1,0 +1,7 @@
+void f(bool x, int y){
+return 6;
+}
+int main(){
+  int z;
+  bool w;
+}
