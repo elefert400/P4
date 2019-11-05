@@ -152,7 +152,7 @@ void PostIncStmtNode::typeAnalysis(TypeAnalysis* ta, TypeNode* fnRetType){
 	//checking if exp is of type int or ptr
 	if(!(ExpType->isInt() || ExpType->isPtr()))
 	{
-		ta->badMathOpd(myExp->getLine(), myExp->getCol());
+		ta->badMathOpr(myExp->getLine(), myExp->getCol());
 		valid = false;
 	}
 
@@ -854,7 +854,7 @@ void EqualsNode::typeAnalysis(TypeAnalysis* ta){
 	//inserting valids into the HashMap
 	if(valid)
 	{	//bool && bool
-	    ta->nodeType(this, Exp2Type);
+	    ta->nodeType(this, VarType::produce(BOOL));
 	}
 
 	//not valid cases
@@ -908,7 +908,7 @@ void NotEqualsNode::typeAnalysis(TypeAnalysis* ta){
 	//inserting valids into the HashMap
 	if(valid)
 	{	//bool && bool
-	    ta->nodeType(this, Exp2Type);
+	   ta->nodeType(this, VarType::produce(BOOL));
 	}
 
 	//not valid cases
@@ -1211,7 +1211,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 	// it is usually ok to do the assignment. One
 	// exception is that if both types are function
 	// names, it should fail type analysis
-	if(tgtType->asFn() != nullptr || srcType->asFn() != nullptr){
+	else if(tgtType->asFn() != nullptr || srcType->asFn() != nullptr){
 		ta->badAssignOpd(this->getLine(), this->getCol());
 		//ta->nodeType(this, ErrorType::produce());
 		valid = false;
@@ -1227,7 +1227,7 @@ void AssignNode::typeAnalysis(TypeAnalysis * ta){
 		// also tell the typeAnalysis object that the
 		// analysis has failed, meaning that main.cpp
 		// will print "Type check failed" at the end
-		ta->badAssignOpr(this->getLine(), this->getCol());
+		//ta->badAssignOpr(this->getLine(), this->getCol());
 
 
 		//Note that reporting an error does not set the

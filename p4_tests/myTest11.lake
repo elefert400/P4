@@ -1,0 +1,22 @@
+int main(){
+  int x;
+  int y;
+  bool z;
+  y = x + y;
+  y = x + z;
+
+  y = x * y;
+  y = x * z;
+
+  y = x - y;
+  y = x - z;
+
+  y = x / y;
+  y = x / z;
+
+  x++;
+  z++;
+
+  x--;
+  z--;
+}

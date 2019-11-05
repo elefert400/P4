@@ -1,0 +1,17 @@
+void f(){}
+int g() {}
+
+int main()
+{
+  int x;
+  bool y;
+
+  y = x == g();
+  y = x == f();
+
+  y = x != g();
+  y = x != f();
+
+  y = x == g;
+  y = x != g;
+}
